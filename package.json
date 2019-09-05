@@ -1,11 +1,15 @@
 {
   "name": "parallel-http-request",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simplicity to create multiple HTTP Request in Parallel for NodeJS",
   "main": "src/parallelrequest.js",
   "scripts": {
     "test": "nyc --reporter=html --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aalfiann/parallel-http-request.git"
   },
   "keywords": [
     "async",
