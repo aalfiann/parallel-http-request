@@ -58,7 +58,7 @@ request.add({
         }
     })
     .add({
-        url:'https://jsonplaceholder.typicode.com/posts/2',
+        url:'https://jsonplaceholder.typicode.com/posts/3',
         method:'delete',
         headers:{'Content-Type':'application/json'},
         body: {
@@ -133,7 +133,7 @@ request.add({url:'https://www.google.com', method:'delete'});
 request.add({url:'https://www.google.com', method:'head'});
 ```
 
-#### Request with Query /Body / Form
+#### Request with Query / Body / Form
 ##### POST with Query Parameter
 ```javascript
 request.add({
