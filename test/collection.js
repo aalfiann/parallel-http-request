@@ -31,7 +31,7 @@ describe('collection test',function(){
 
     it('cleanup collection',function(){
         request.clean();
-        assert.deepEqual(request.getCollection(),{});
+        assert.deepEqual(request.getCollection(),[]);
     });
 
 })
