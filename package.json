@@ -1,6 +1,6 @@
 {
   "name": "parallel-http-request",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simplicity to create multiple HTTP Request in Parallel for NodeJS",
   "main": "src/parallelrequest.js",
   "scripts": {

@@ -124,7 +124,7 @@ class ParallelRequest extends Helper {
                     }
 
                     // add body
-                    if(!self.isEmpty(request.body) && ( self.isString(request.body) || self.isObject(request.body) && !self.isEmptyObject(request.body))) {
+                    if(!self.isEmpty(request.body) && ( self.isString(request.body) || (self.isObject(request.body) && !self.isEmptyObject(request.body)))) {
                         req.send(request.body);
                     }
 
@@ -223,14 +223,14 @@ class ParallelRequest extends Helper {
                     return req.end(function(response){
                         resolve({
                             url:request.url,
-                            method:request.method,
+                            method:self.isEmpty(request.method)?'get':request.method,
                             data:response
                         });
                     });
                 } catch (err) {
                     reject({
                         url:request.url,
-                        method:request.method,
+                        method:self.isEmpty(request.method)?'get':request.method,
                         data:{
                             statusCode:500,
                             error:{

@@ -360,6 +360,9 @@ describe('request options test',function(){
         .add({url:'http://google.com',method:'get',
             httpSignature:{'name':'abc'}
         })
+        .add({url:'http://google.com',
+            httpSignature:{'name':'abc'}
+        })
         .send(function(response){
             if(response[0].status == 200) {
                 done();
@@ -375,6 +378,9 @@ describe('request options test',function(){
         request.add('https://jsonplaceholder.typicode.com/posts/1')
         .add('https://jsonplaceholder.typicode.com/posts/2')
         .add({url:'http://google.com',method:'get',
+            httpSignature:{'name':'abc'}
+        })
+        .add({url:'http://google.com',
             httpSignature:{'name':'abc'}
         })
         .send(function(response){
