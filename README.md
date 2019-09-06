@@ -79,11 +79,9 @@ request.add({
 ```
 
 ## Documentation
-This **Parallel HTTP Request** is created based on [unirest-nodejs](https://github.com/Kong/unirest-nodejs#readme) library.  
-The **request.options** is almost similar with `unirest`.  
+This **Parallel HTTP Request** is created based on [unirest-nodejs](https://github.com/Kong/unirest-nodejs#readme) library, so **request.options** is almost similar with `unirest`.  
 
 **Note:**
-- The output response from request also slightly different with `unirest`.
 - This library is intended to create multiple request in parallel, so not all `unirest` feature is worked.  Please see [Limitation](#Limitation).
 
 ### request.add(options)
@@ -361,7 +359,7 @@ request.add({
 There is several feature which is not posible to do with multiple request.
 
 - `oAuth` - Sets oauth, list of oauth credentials, on Request.options based on given object.
-- `jar`: (Object) - Creates a container to store multiple cookies, i.e. a cookie jar.
+- `jar` - Creates a container to store multiple cookies, i.e. a cookie jar.
 - `part` - Still `Experimental`; Similiar to request multipart.
 - `then` - promise function.
 - `pool` - Single request; for socket connection which is use for single connection.
