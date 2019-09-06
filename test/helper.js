@@ -94,4 +94,11 @@ describe('helper function test', function(){
         assert.equal(true,request.isEmptyObject(obj));
     });
 
+    it('safeStringify success to avoid type error converting circular',function(){
+        var o = {};
+        o.o = o;
+        var result = JSON.parse(request.safeStringify(o));
+        assert.equal(true,request.isObject(result));
+    });
+
 });

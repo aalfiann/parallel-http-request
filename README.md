@@ -22,11 +22,18 @@ $ npm install parallel-http-request
 var ParallelRequest = require('parallel-http-request');
 
 var config = {
-    response: "simple"    // [optional] detail|simple, if empty then the response output is simple
+    response: "simple"    // [optional] detail|simple|unirest, if empty then the response output is simple
 };
 
 var request = new ParallelRequest(config);
+
+//or without config
+var request = new ParallelRequest();
 ```
+The `config.response` options value is :
+- `simple` : minimalist output response.
+- `detail` : output response very detail.
+- `unirest` : output response with unirest format.
 
 ### Make Request
 ```javascript
@@ -76,8 +83,8 @@ This **Parallel HTTP Request** is created based on [unirest-nodejs](https://gith
 The **request.options** is almost similar with `unirest`.  
 
 **Note:**
-- This library is intended to create multiple request in parallel, so not all `unirest` feature is worked.
-- The output response from request also different with `unirest`.
+- The output response from request also slightly different with `unirest`.
+- This library is intended to create multiple request in parallel, so not all `unirest` feature is worked.  Please see [Limitation](#Limitation).
 
 ### request.add(options)
 To make a multiple http request, you have to use **.add()** for each request.  
@@ -119,6 +126,33 @@ request.send(function(response){
 - `hawk: (Object)` - Sets `hawk`, HAWK Signing Credentials.
 - `cookie: (String)` - Creates a cookie.
 
+### request.remove(name)
+This will remove url in collection.  
+- `name` is the url of the request.
+```javascript
+request.remove('http://google.com');
+```
+
+### request.clean()
+This will cleanup all request in collection.  
+```javascript
+request.clean();
+```
+
+### request.getCollection()
+This will return all request in collection.
+```javascript
+request.getCollection();
+```
+
+### request.unirest
+If you want to use `unirest` (the underlying layer of parallel-http-request) directly.
+```javascript
+request.unirest.get('http://google.com')
+    .end(function(response){
+        console.log(response)
+    });
+```
 
 ### Example
 
@@ -196,7 +230,7 @@ request.add({
     });
 ```
 
-##### Request with Upload File
+#### Request with Upload File
 ```javascript
 request.add({
         url:'http://mockbin.com/request',
@@ -206,12 +240,13 @@ request.add({
             'Content-Length': fs.statSync(path.resolve('favicon.ico')).size
         },
         attach:{
-            file:fs.createReadStream(path.resolve('favicon.ico'))
+            'file':fs.createReadStream(path.resolve('favicon.ico')),
+            'remote file':request.unirest.request('http://google.com/favicon.ico')
         }
     });
 ```
 
-##### Request with timeout
+#### Request with timeout
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -219,7 +254,7 @@ request.add({
     });
 ```
 
-##### Request with encoding
+#### Request with encoding
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -227,7 +262,7 @@ request.add({
     });
 ```
 
-##### Request with followRedirect
+#### Request with followRedirect
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -235,7 +270,7 @@ request.add({
     });
 ```
 
-##### Request with maxRedirects
+#### Request with maxRedirects
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -243,7 +278,7 @@ request.add({
     });
 ```
 
-##### Request with strictSSL
+#### Request with strictSSL
 ```javascript
 request.add({
         url:'https://www.google.com',
@@ -251,7 +286,7 @@ request.add({
     });
 ```
 
-##### Request with proxy
+#### Request with proxy
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -259,7 +294,7 @@ request.add({
     });
 ```
 
-##### Request with secureProtocol
+#### Request with secureProtocol
 ```javascript
 request.add({
         url:'https://www.google.com',
@@ -267,7 +302,7 @@ request.add({
     });
 ```
 
-##### Request with localAddress
+#### Request with localAddress
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -275,7 +310,7 @@ request.add({
     });
 ```
 
-##### Request with auth
+#### Request with auth
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -287,7 +322,7 @@ request.add({
     });
 ```
 
-##### Request with aws
+#### Request with aws
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -299,7 +334,7 @@ request.add({
     });
 ```
 
-##### Request with hawk
+#### Request with hawk
 ```javascript
 request.add({
         url:'http://www.google.com',
@@ -313,7 +348,7 @@ request.add({
     });
 ```
 
-##### Request with cookie
+#### Request with cookie
 Create request with `cookie`. Please see [documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
 ```javascript
 request.add({
@@ -321,6 +356,79 @@ request.add({
         cookie:'yummy_cookie=choco; tasty_cookie=strawberry'
     });
 ```
+
+## Limitation
+There is several feature which is not posible to do with multiple request.
+
+- `oAuth` - Sets oauth, list of oauth credentials, on Request.options based on given object.
+- `jar`: (Object) - Creates a container to store multiple cookies, i.e. a cookie jar.
+- `part` - Still `Experimental`; Similiar to request multipart.
+- `then` - promise function.
+- `pool` - Single request; for socket connection which is use for single connection.
+- `forever` - Keeps socket connections alive between keep-alive in requests.
+
+The solution about this limitation is you have to directly use `unirest` libary.
+
+### Example to use Unirest directly
+Note: 
+- This example below is for single http request with `unirest` library.
+
+#### Request with oAuth
+```javascript
+request.unirest
+  .get('https://api.twitter.com/oauth/request_token')
+  .oauth({
+    callback: 'http://mysite.com/callback/',
+    consumer_key: 'CONSUMER_KEY',
+    consumer_secret: 'CONSUMER_SECRET'
+  })
+  .then(response => {
+    let access_token = response.body
+ 
+    return request.unirest
+      .post('https://api.twitter.com/oauth/access_token')
+      .oauth({
+        consumer_key: 'CONSUMER_KEY',
+        consumer_secret: 'CONSUMER_SECRET',
+        token: access_token.oauth_token,
+        verifier: token: access_token.oauth_verifier
+      })
+  })
+  .then((response) => {
+    var token = response.body
+ 
+    return request.unirest
+      .get('https://api.twitter.com/1/users/show.json')
+      .oauth({
+        consumer_key: 'CONSUMER_KEY',
+        consumer_secret: 'CONSUMER_SECRET',
+        token: token.oauth_token,
+        token_secret: token.oauth_token_secret
+      })
+      .query({
+        screen_name: token.screen_name,
+        user_id: token.user_id
+      })
+  })
+  .then((response) => {
+    console.log(response.body)
+  });
+```
+
+#### Request with Jar
+```javascript
+var cookieJar = request.unirest.jar();
+cookieJar.add(request.unirest.cookie('another cookie=23'));
+
+request.unirest
+    .get('http://google.com')
+    .jar(CookieJar)
+    .end(function (response) {
+        // Except google trims the value passed :/
+        console.log(response.cookie('another cookie'));
+});
+```
+
 
 ## Unit Test
 ```bash

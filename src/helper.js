@@ -76,6 +76,41 @@ class Helper {
         }
         return true;
     }
+
+    /**
+     * Safe JSON.stringify to avoid type error converting circular structure to json
+     * @param {object} value        this is the json object 
+     * @param {*} space 
+     * @return {string}
+     */
+    safeStringify(value, space) {
+        var cache = [];
+    
+        var output = JSON.stringify(value, function (key, value) {
+    
+            //filters vue.js internal properties
+            if(key && key.length>0 && (key.charAt(0)=="$" || key.charAt(0)=="_")) {
+    
+                return;
+            }
+    
+            if (typeof value === 'object' && value !== null) {
+                if (cache.indexOf(value) !== -1) {
+                    // Circular reference found, discard key
+                    return;
+                }
+                // Store value in our collection
+                cache.push(value);
+            }
+    
+    
+            return value;
+        }, space)
+    
+        cache = null; // Enable garbage collection
+    
+        return output;
+    }
 }
 
 module.exports = Helper;

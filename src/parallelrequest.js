@@ -14,7 +14,7 @@ class ParallelRequest extends Helper {
      * Note:
      * Example required options
      * {
-     *      response: ""            >> [optional] detail|simple, if empty then the response output is simple
+     *      response: ""            >> [optional] detail|simple|unirest, if empty then the response output is simple
      * }
      */
     constructor(options='') {
@@ -32,6 +32,14 @@ class ParallelRequest extends Helper {
                 throw new Error('Options must be an object type!');
             }
         }
+        this._unirest = unirest;
+    }
+
+    /**
+     * Get unirest
+     */
+    get unirest() {
+        return this._unirest;
     }
 
     /**
@@ -221,24 +229,44 @@ class ParallelRequest extends Helper {
                     }
 
                     return req.end(function(response){
-                        resolve({
-                            url:request.url,
-                            method:self.isEmpty(request.method)?'get':request.method,
-                            data:response
-                        });
-                    });
-                } catch (err) {
-                    reject({
-                        url:request.url,
-                        method:self.isEmpty(request.method)?'get':request.method,
-                        data:{
-                            statusCode:500,
-                            error:{
-                                Error:err,
-                                status:500
-                            }
+                        switch(true) {
+                            case (self.response.toLowerCase() == 'unirest') :
+                                resolve({
+                                    url:request.url,
+                                    method:self.isEmpty(request.method)?'get':request.method,
+                                    unirest:JSON.parse(self.safeStringify(response))
+                                });
+                                break;
+                            default :
+                                resolve({
+                                    url:request.url,
+                                    method:self.isEmpty(request.method)?'get':request.method,
+                                    unirest:response
+                                });
                         }
                     });
+                } catch (err) {
+                    switch(true) {
+                        case (self.response.toLowerCase() == 'unirest') :
+                            reject({
+                                url:request.url,
+                                method:self.isEmpty(request.method)?'get':request.method,
+                                unirest:JSON.parse(self.safeStringify(err))
+                            });
+                            break;
+                        default :
+                            reject({
+                                url:request.url,
+                                method:self.isEmpty(request.method)?'get':request.method,
+                                unirest:{
+                                    statusCode:500,
+                                    error:{
+                                        Error:err,
+                                        status:500
+                                    }
+                                }
+                            });
+                    }
                 }
             });
         });
@@ -253,67 +281,83 @@ class ParallelRequest extends Helper {
         // Execute Promises
         Promise.all(body.map(toResultObject)).then(function(result) {
             for (let i = 0; i < result.length; ++i) {
+                // case promise error
                 if (!result[i].success) {
-                    // case error
-                    if(self.response.toLowerCase() == 'detail') {
-                        content.push({
-                            url:result[i].error.url,
-                            method:result[i].error.method,
-                            status:result[i].error.data.error.status,
-                            headers:{},
-                            body:{},
-                            request:{},
-                            error:result[i].error.data.error
-                        });
-                    } else {
-                        content.push({
-                            url:result[i].error.url,
-                            method:result[i].error.method,
-                            status:result[i].error.data.error.status,
-                            body:{}
-                        });
-                    }
-                } else {
-                    // case success
-                    if(!result[i].result.data.error){
-                        if(self.response.toLowerCase() == 'detail') {
-                            var datares = {
-                                url:result[i].result.url,
-                                method:result[i].result.method,
-                                status:result[i].result.data.statusCode,
-                                headers:result[i].result.data.headers,
-                                body:result[i].result.data.body
-                            };
-                            if(!self.isEmptyObject(result[i].result.data.request) && !self.isEmptyObject(result[i].result.data.request)) {
-                                datares.request = result[i].result.data.request;
-                            }
-                            content.push(datares);
-                        } else {
+                    switch(true) {
+                        case (self.response.toLowerCase() == 'detail') :
                             content.push({
-                                url:result[i].result.url,
-                                method:result[i].result.method,
-                                status:result[i].result.data.statusCode,
-                                body:result[i].result.data.body
-                            });
-                        }
-                    } else {
-                        if(self.response.toLowerCase() == 'detail') {
-                            content.push({
-                                url:result[i].result.url,
-                                method:result[i].result.method,
-                                status:result[i].result.data.error.status,
+                                url:result[i].error.url,
+                                method:result[i].error.method,
+                                status:result[i].error.unirest.error.status,
                                 headers:{},
                                 body:{},
                                 request:{},
-                                error:result[i].result.data.error
+                                error:result[i].error.unirest.error
                             });
-                        } else {
+                            break;
+                        case  (self.response.toLowerCase() == 'unirest') :
+                            content.push(result[i].error);
+                            break;
+                        default :
                             content.push({
-                                url:result[i].result.url,
-                                method:result[i].result.method,
-                                status:result[i].result.data.error.status,
+                                url:result[i].error.url,
+                                method:result[i].error.method,
+                                status:result[i].error.unirest.error.status,
                                 body:{}
                             });
+                    }
+                } else {
+                    // case promise success
+                    if(!result[i].result.unirest.error){ // case response success
+                        switch(true) {
+                            case (self.response.toLowerCase() == 'detail') :
+                                var datares = {
+                                    url:result[i].result.url,
+                                    method:result[i].result.method,
+                                    status:result[i].result.unirest.statusCode,
+                                    headers:result[i].result.unirest.headers,
+                                    body:result[i].result.unirest.body
+                                };
+                                if(!self.isEmptyObject(result[i].result.unirest.request) && !self.isEmptyObject(result[i].result.unirest.request)) {
+                                    datares.request = result[i].result.unirest.request;
+                                }
+                                content.push(datares);
+                                break;
+                            case (self.response.toLowerCase() == 'unirest') :
+                                content.push(result[i].result);
+                                break;
+                            default :
+                                content.push({
+                                    url:result[i].result.url,
+                                    method:result[i].result.method,
+                                    status:result[i].result.unirest.statusCode,
+                                    body:result[i].result.unirest.body
+                                });
+
+                        }
+                    } else { // case response error
+                        switch(true) {
+                            case (self.response.toLowerCase() == 'detail') :
+                                content.push({
+                                    url:result[i].result.url,
+                                    method:result[i].result.method,
+                                    status:result[i].result.unirest.error.status,
+                                    headers:{},
+                                    body:{},
+                                    request:{},
+                                    error:result[i].result.unirest.error
+                                });
+                                break;
+                            case (self.response.toLowerCase() == 'unirest') :
+                                content.push(result[i].result);
+                                break;
+                            default:
+                                content.push({
+                                    url:result[i].result.url,
+                                    method:result[i].result.method,
+                                    status:result[i].result.unirest.error.status,
+                                    body:{}
+                                });
                         }
                     }
                 }

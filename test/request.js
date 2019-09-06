@@ -392,6 +392,26 @@ describe('request options test',function(){
         });
     });
 
+    it('request with wrong httpSignature and response unirest',function(done){
+        this.timeout(10000);
+        var request = new ParallelRequest({response:'unirest'});
+        request.add('https://jsonplaceholder.typicode.com/posts/1')
+        .add('https://jsonplaceholder.typicode.com/posts/2')
+        .add({url:'http://google.com',method:'get',
+            httpSignature:{'name':'abc'}
+        })
+        .add({url:'http://google.com',
+            httpSignature:{'name':'abc'}
+        })
+        .send(function(response){
+            if(response[0].status == 200) {
+                done();
+            } else {
+                done();
+            }
+        });
+    });
+
     it('request with set proxy',function(done){
         this.timeout(10000);
         var request = new ParallelRequest({response:'detail'});
@@ -475,6 +495,20 @@ describe('request options test',function(){
     it('request with offline localAddress response simple',function(done){
         this.timeout(10000);
         var request = new ParallelRequest({response:'simple'});
+        request.add({url:'http://google.com',method:'get',
+            localAddress:'127.0.0.1'
+        }).send(function(response){
+            if(response[0].status == undefined) {
+                done();
+            } else {
+                done();
+            }
+        });
+    });
+
+    it('request with offline localAddress response unirest',function(done){
+        this.timeout(10000);
+        var request = new ParallelRequest({response:'unirest'});
         request.add({url:'http://google.com',method:'get',
             localAddress:'127.0.0.1'
         }).send(function(response){
