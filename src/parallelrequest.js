@@ -37,15 +37,33 @@ class ParallelRequest extends Helper {
 
     /**
      * Get unirest
+     * @return {unirest}
      */
     get unirest() {
         return this._unirest;
     }
 
     /**
+     * Get jar collection
+     * @return {unirest.jar()}
+     */
+    get jar() {
+        return this._unirest.jar();
+    }
+
+    /**
+     * Create cookie
+     * @param {string} data
+     * @return {string}
+     */
+    cookie(data) {
+        return this._unirest.cookie(data);
+    }
+
+    /**
      * Add request into collection
      * @param {object} request
-     * @return this; 
+     * @return {this} 
      */
     add(request) {
         if(this.isString(request) && !this.isEmpty(request)) {
@@ -107,6 +125,9 @@ class ParallelRequest extends Helper {
                         break;
                         case (request.method.toLowerCase() == 'delete'):
                             var req = unirest.delete(request.url);
+                        break;
+                        case (request.method.toLowerCase() == 'options'):
+                            var req = unirest.options(request.url);
                         break;
                         default:
                             var req = unirest.get(request.url);
@@ -225,7 +246,14 @@ class ParallelRequest extends Helper {
 
                     // set cookie
                     if(!self.isEmpty(request.cookie) && self.isString(request.cookie)) {
-                        req.cookie(request.cookie);
+                        var cookieJar = unirest.jar();
+                        cookieJar.add(unirest.cookie(request.cookie));
+                        req.jar(cookieJar);
+                    }
+
+                    // set jar
+                    if(!self.isEmpty(request.jar)) {
+                        req.jar(request.jar);
                     }
 
                     return req.end(function(response){

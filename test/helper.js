@@ -101,4 +101,10 @@ describe('helper function test', function(){
         assert.equal(true,request.isObject(result));
     });
 
+    it('object circular is not empty and is object',function(){
+        var o = {};
+        o.o = o;
+        assert.equal(true,(!request.isEmpty(o) && request.isObject(o)));
+    });
+    
 });

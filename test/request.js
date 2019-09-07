@@ -71,6 +71,17 @@ describe('request options test',function(){
             });
     });
 
+    it('request with options method',function(done){
+        this.timeout(10000);
+        var request = new ParallelRequest({response:'detail'});
+        request.add({url:'https://jsonplaceholder.typicode.com/posts/1',method:'options'})
+            .send(function(response){
+                if(response[0].method == 'options') {
+                    done();
+                }
+            });
+    });
+
     it('request with auth',function(done){
         this.timeout(10000);
         var request = new ParallelRequest({response:'detail'});
@@ -559,8 +570,27 @@ describe('request options test',function(){
     it('request with set cookie',function(done){
         this.timeout(10000);
         var request = new ParallelRequest({response:'detail'});
-        request.add({url:'http://google.com',method:'get',
+        request.add({url:'https://jsonplaceholder.typicode.com/posts/1',method:'get',
             cookie:'yummy_cookie=choco; tasty_cookie=strawberry'
+        }).send(function(response){
+            if(response[0].status == 200) {
+                done();
+            } else {
+                done();
+            }
+        });
+    });
+
+    it('request with set cookie with jar',function(done){
+        this.timeout(10000);
+        var request = new ParallelRequest({response:'detail'});
+        
+        var cookieJar = request.jar;
+        var cookie = request.cookie('yummy_cookie=choco; tasty_cookie=strawberry');
+        cookieJar.add(cookie);
+
+        request.add({url:'https://jsonplaceholder.typicode.com/posts/1',method:'get',
+            jar:cookieJar
         }).send(function(response){
             if(response[0].status == 200) {
                 done();

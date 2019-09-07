@@ -144,11 +144,14 @@ request.getCollection();
 ```
 
 ### request.unirest
-If you want to use `unirest` (the underlying layer of parallel-http-request) directly.
+If you want to use `unirest` (the underlying layer of parallel-http-request) directly.  
+Because Sometimes we are not always have to call request in parallel.  
+Please see [Unirest Documentation](https://github.com/Kong/unirest-nodejs#readme).
+
 ```javascript
 request.unirest.get('http://google.com')
     .end(function(response){
-        console.log(response)
+        console.log(response.body)
     });
 ```
 
@@ -163,6 +166,7 @@ request.add({url:'https://www.google.com', method:'put'});
 request.add({url:'https://www.google.com', method:'patch'});
 request.add({url:'https://www.google.com', method:'delete'});
 request.add({url:'https://www.google.com', method:'head'});
+request.add({url:'https://www.google.com', method:'options'});
 ```
 
 #### Request with Query / Body / Form
@@ -182,7 +186,7 @@ request.add({
 request.add({
         url:'https://jsonplaceholder.typicode.com/posts/1', 
         method:'post',
-        headers:{'Content-Type','application/json'}
+        headers:{'Content-Type':'application/json'}
         body: {
             fullname:'value',
             address:'value'
@@ -195,7 +199,7 @@ request.add({
 request.add({
         url:'https://jsonplaceholder.typicode.com/posts/1', 
         method:'post',
-        headers:{'Content-Type','application/x-www-form-urlencoded'}
+        headers:{'Content-Type':'application/x-www-form-urlencoded'}
         form: {
             fullname:'value',
             address:'value'
@@ -204,7 +208,7 @@ request.add({
     .add({
         url:'https://jsonplaceholder.typicode.com/posts/2', 
         method:'post',
-        headers:{'Content-Type','application/x-www-form-urlencoded'}
+        headers:{'Content-Type':'application/x-www-form-urlencoded'}
         body: JSON.stringify({
             fullname:'value',
             address:'value'
@@ -213,7 +217,7 @@ request.add({
     .add({
         url:'https://jsonplaceholder.typicode.com/posts/3', 
         method:'post',
-        headers:{'Content-Type','application/x-www-form-urlencoded'}
+        headers:{'Content-Type':'application/x-www-form-urlencoded'}
         body: 'name=nijiko&pet=turtle'
     });
 ```
@@ -223,7 +227,7 @@ request.add({
 request.add({
         url:'https://jsonplaceholder.typicode.com/posts/1', 
         method:'post',
-        headers:{'Content-Type','text/html'}
+        headers:{'Content-Type':'text/html'}
         body: '<strong>Hello World!</strong>'
     });
 ```
@@ -355,11 +359,24 @@ request.add({
     });
 ```
 
-## Limitation
-There is several feature which is not posible to do with multiple request.
+#### Request with Jar
+Creates a container to store multiple cookies, i.e. a cookie jar.
+```javascript
+var cookieJar = request.jar;
+cookieJar.add(request.cookie('yummy_cookie=choco; tasty_cookie=strawberry'));
+// or as argument
+cookieJar.add('key=value', '/');
 
-- `oAuth` - Sets oauth, list of oauth credentials, on Request.options based on given object.
-- `jar` - Creates a container to store multiple cookies, i.e. a cookie jar.
+request.add({
+        url:'http://google.com',
+        jar:cookieJar
+    });
+```
+
+## Limitation
+There is several feature which is not posible to do with multiple parallel request.
+
+- `oauth` - Sets oauth, list of oauth credentials.
 - `part` - Still `Experimental`; Similiar to request multipart.
 - `then` - promise function.
 - `pool` - Single request; for socket connection which is use for single connection.
@@ -368,8 +385,6 @@ There is several feature which is not posible to do with multiple request.
 The solution about this limitation is you have to directly use `unirest` libary.
 
 ### Example to use Unirest directly
-Note: 
-- This example below is for single http request with `unirest` library.
 
 #### Request with oAuth
 ```javascript
@@ -412,20 +427,7 @@ request.unirest
     console.log(response.body)
   });
 ```
-
-#### Request with Jar
-```javascript
-var cookieJar = request.unirest.jar();
-cookieJar.add(request.unirest.cookie('another cookie=23'));
-
-request.unirest
-    .get('http://google.com')
-    .jar(CookieJar)
-    .end(function (response) {
-        // Except google trims the value passed :/
-        console.log(response.cookie('another cookie'));
-});
-```
+Please see [Unirest Documentation](https://github.com/Kong/unirest-nodejs#readme).  
 
 
 ## Unit Test
