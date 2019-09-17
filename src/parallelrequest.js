@@ -308,7 +308,8 @@ class ParallelRequest extends Helper {
 
         // Execute Promises
         Promise.all(body.map(toResultObject)).then(function(result) {
-            for (let i = 0; i < result.length; ++i) {
+            var len = result.length;
+            for (var i = 0; i < len; ++i) {
                 // case promise error
                 if (!result[i].success) {
                     switch(true) {
