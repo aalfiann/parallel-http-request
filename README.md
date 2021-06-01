@@ -2,7 +2,7 @@
 [![NPM](https://nodei.co/npm/parallel-http-request.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/parallel-http-request/)  
   
 [![npm version](https://img.shields.io/npm/v/parallel-http-request.svg?style=flat-square)](https://www.npmjs.org/package/parallel-http-request)
-[![Build Status](https://travis-ci.org/aalfiann/parallel-http-request.svg?branch=master)](https://travis-ci.org/aalfiann/parallel-http-request)
+[![Build Status](https://travis-ci.com/aalfiann/parallel-http-request.svg?branch=master)](https://travis-ci.com/aalfiann/parallel-http-request)
 [![Coverage Status](https://coveralls.io/repos/github/aalfiann/parallel-http-request/badge.svg?branch=master)](https://coveralls.io/github/aalfiann/parallel-http-request?branch=master)
 [![Known Vulnerabilities](https://snyk.io//test/github/aalfiann/parallel-http-request/badge.svg?targetFile=package.json)](https://snyk.io//test/github/aalfiann/parallel-http-request?targetFile=package.json)
 ![NPM download/month](https://img.shields.io/npm/dm/parallel-http-request.svg)
